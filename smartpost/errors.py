@@ -1,0 +1,2 @@
+class SmartpostError(BaseException):
+    pass
