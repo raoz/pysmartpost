@@ -2,8 +2,8 @@ import xml.etree.ElementTree as ET
 
 import requests
 
-from smartpost.errors import SmartpostError
-from smartpost.models import SentItem
+from .errors import SmartpostError
+from .models import SentItem
 
 
 class SmartpostAPI:
