@@ -77,7 +77,7 @@ class SmartpostAPI:
         return self.post("labels", doc, "bytes")
 
     def shipment(self, items, report_emails=[]):
-        if len(items) > 5:
+        if len(report_emails) > 5:
             raise ValueError("Can have no more than five report fiels")
 
         doc = ET.Element("orders")
