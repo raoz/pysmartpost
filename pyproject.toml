@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "itella-smartpost"
+name = "smartpost"
 version = "0.1.0"
 description = "Python library to interact with Itella Smartpost API"
 authors = ["Rao Zvorovski <rao.zvorovski@codeduf.eu>"]
