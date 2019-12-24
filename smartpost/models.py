@@ -78,7 +78,8 @@ class CourierDestination:
         WORKDAY = 2
         EVENING = 3
 
-    def __init__(self, street, house, apartment, city, country, details, time_window=TimeWindow.ANY):
+    def __init__(self, street, city, country, postal_code, details=None, time_window=TimeWindow.ANY, house=None,
+                 apartment=None):
         self.street = street
         self.house = house
         self.apartment = apartment
@@ -86,6 +87,7 @@ class CourierDestination:
         self.country = country
         self.details = details
         self.time_window = time_window
+        self.postal_code = postal_code
 
     def to_xml(self):
         el = ET.Element("destination")
@@ -96,8 +98,10 @@ class CourierDestination:
             ET.SubElement(el, "apartment").text = str(self.house)
         ET.SubElement(el, "city").text = self.city
         ET.SubElement(el, "country").text = self.country
-        ET.SubElement(el, "details").text = self.details
+        if self.details:
+            ET.SubElement(el, "details").text = self.details
         ET.SubElement(el, "timewindow").text = str(self.time_window.value)
+        ET.SubElement(el, "postalcode").text = str(self.postal_code)
 
         return el
 
@@ -110,7 +114,7 @@ class Item:
         L = 7
         XL = 8
 
-    def __init__(self, reference, content, weight, size, destination, recipient, sender=None,
+    def __init__(self, content, weight, size, destination, recipient, reference=None, sender=None,
                  barcode=None, parent_item=None, lq_items=None,
                  express=False, id_check=False, age_check=False, notify_email=None,
                  notify_phone=None, paid_by_recipient=False):
