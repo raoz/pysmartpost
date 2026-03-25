@@ -72,6 +72,7 @@ class SmartpostAPI:
             document.insert(0, auth)
         else:
             # New API key authentication via header
+            # Note: SmartPosti API expects the raw API key without 'Bearer' or other prefix
             headers['Authorization'] = self.api_key
 
         xml = ET.tostring(document)
@@ -79,7 +80,7 @@ class SmartpostAPI:
 
         # Build URL with request parameter for legacy API, or use endpoint path for new API
         if self.use_legacy_auth:
-            url = f"{self.BASE_URL}"
+            url = self.BASE_URL
             params = {'request': request}
         else:
             # For new API, the request type is part of the URL path
