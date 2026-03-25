@@ -8,14 +8,42 @@ from .models import SentItem
 
 class SmartpostAPI:
 
-    def __init__(self, username, password,
-                 session=None, timeout=30, proxies=None):
-        self.BASE_URL = "https://iseteenindus.smartpost.ee/api/"
+    def __init__(self, username=None, password=None, api_key=None,
+                 session=None, timeout=30, proxies=None, use_legacy_api=False):
+        """
+        Initialize SmartpostAPI client.
+        
+        Args:
+            username: (Deprecated) Username for legacy XML authentication
+            password: (Deprecated) Password for legacy XML authentication
+            api_key: API key for new authentication method (recommended)
+            session: Optional requests.Session instance
+            timeout: Request timeout in seconds
+            proxies: Optional proxy configuration
+            use_legacy_api: If True, uses old endpoint (deprecated, not recommended)
+        
+        Note:
+            The new API uses API key authentication via Authorization header.
+            Old username/password XML authentication is deprecated.
+            Get your API key from: https://www.smartposti.ee/
+        """
+        if use_legacy_api:
+            self.BASE_URL = "https://iseteenindus.smartpost.ee/api/"
+        else:
+            self.BASE_URL = "https://gateway.posti.fi/smartpost/api/ext/v1/"
+        
         self.username = username
         self.password = password
+        self.api_key = api_key
+        self.use_legacy_auth = bool(username and password and not api_key)
         self.session = session or requests.Session()
         self.timeout = timeout
         self.proxies = proxies
+        
+        if not self.use_legacy_auth and not self.api_key:
+            raise ValueError(
+                "Either api_key (recommended) or username+password (deprecated) must be provided"
+            )
 
     def __enter__(self):
         return self
@@ -30,23 +58,39 @@ class SmartpostAPI:
         self.session.close()
 
     def post(self, request, document, return_format='text'):
-        auth = ET.Element('authentication')
-        user = ET.SubElement(auth, "user")
-        password = ET.SubElement(auth, "password")
-        user.text = self.username
-        password.text = self.password
-
-        document.insert(0, auth)
+        # Prepare headers
+        headers = {'Content-Type': 'application/xml'}
+        
+        # Add authentication based on method
+        if self.use_legacy_auth:
+            # Old XML-based authentication (deprecated)
+            auth = ET.Element('authentication')
+            user = ET.SubElement(auth, "user")
+            password = ET.SubElement(auth, "password")
+            user.text = self.username
+            password.text = self.password
+            document.insert(0, auth)
+        else:
+            # New API key authentication via header
+            headers['Authorization'] = self.api_key
 
         xml = ET.tostring(document)
         print(xml)
 
+        # Build URL with request parameter for legacy API, or use endpoint path for new API
+        if self.use_legacy_auth:
+            url = f"{self.BASE_URL}"
+            params = {'request': request}
+        else:
+            # For new API, the request type is part of the URL path
+            url = f"{self.BASE_URL}{request}"
+            params = {}
+
         r = self.session.post(
-            f"{self.BASE_URL}",
-            params={
-                'request': request,
-            },
+            url,
+            params=params,
             data=xml,
+            headers=headers,
             timeout=self.timeout,
             proxies=self.proxies,
         )
