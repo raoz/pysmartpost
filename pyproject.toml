@@ -6,8 +6,8 @@ authors = ["Rao Zvorovski <rao.zvorovski@codeduf.eu>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.6"
-requests = "^2.22"
+python = ">=3.10,<4.0"
+requests = "^2.33.0"
 
 [tool.poetry.dev-dependencies]
 
